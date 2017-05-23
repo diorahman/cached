@@ -1,5 +1,6 @@
 /* eslint-env mocha */
 
+const Promise = require('bluebird')
 const assert = require('assert')
 const Cache = require('./')
 
@@ -16,20 +17,39 @@ describe('cache', () => {
     assert.deepEqual(await cache.smembers(), null)
   })
 
-  it('should set a value', async () => {
+  it('should set and get a value', async () => {
     await cache.del('hihi')
     await cache.set('hihi', {ok: 1})
     const saved = await cache.get('hihi')
     assert.deepEqual(saved, {ok: 1})
   })
 
-  it('should add a member in a set', async () => {
+  it('should add, get and remove members in a set', async () => {
     await cache.del('haha')
     await cache.sadd('haha', {ok: 1})
     await cache.sadd('haha', {ok: 2})
-    await cache.sadd('haha', {ok: 3})
-    await cache.sadd('haha', {ok: 4})
-    const saved = await cache.smembers('haha')
-    assert.deepEqual(saved.length, 4)
+
+    const objects = await cache.smembers('haha')
+    assert.deepEqual(objects, [{ok: 1}, {ok: 2}])
+
+    await cache.del('haha')
+    await cache.sadd('haha', 'ok2')
+    await cache.sadd('haha', 'ok1')
+
+    let strings = await cache.smembers('haha', false)
+    assert.ok(strings.indexOf('ok1') >= 0)
+    assert.ok(strings.indexOf('ok2') >= 0)
+
+    await cache.srem('haha', 'ok1')
+    strings = await cache.smembers('haha', false)
+    assert.deepEqual(strings, ['ok2'])
+  })
+
+  it('should set and expire a value', async () => {
+    await cache.del('hehe')
+    await cache.set('hehe', {ok: 1}, 1)
+    await Promise.delay(1500)
+    const expired = await cache.get('hehe')
+    assert.deepEqual(expired, null)
   })
 })
