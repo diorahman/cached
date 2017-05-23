@@ -15,6 +15,7 @@ describe('cache', () => {
     assert.deepEqual(await cache.sadd(), null)
     assert.deepEqual(await cache.sadd('haha'), null)
     assert.deepEqual(await cache.smembers(), null)
+    assert.deepEqual(await cache.srem(), null)
   })
 
   it('should set and get a value', async () => {
@@ -52,5 +53,38 @@ describe('cache', () => {
     await Promise.delay(1500)
     const expired = await cache.get('hehe')
     assert.deepEqual(expired, null)
+  })
+
+  it('should give null on parsing non-json member', async () => {
+    await cache.del('hehe')
+    await cache.set('hehe', 'hihi')
+    let saved = await cache.get('hehe')
+    assert.deepEqual(saved, null)
+
+    await cache.del('hoho')
+    await cache.sadd('hoho', 'ok1')
+    let member = await cache.smembers('hoho')
+    assert.deepEqual(member, null)
+  })
+
+  it('should give null on invalid expiry', async () => {
+    await cache.del('hehe')
+    const reply = await cache.set('hehe', 'hihi', 'invalid')
+    assert.deepEqual(reply, null)
+  })
+
+  it('should give 0 on removing invalid member', async () => {
+    const reply = await cache.srem('haha', 'hihi')
+    assert.deepEqual(reply, 0)
+  })
+
+  it('should fail on invalid storage', async () => {
+    const config = {
+      host: 'localhost',
+      port: 8000
+    }
+    const fail = new Cache('ok2', config)
+    const reply = await fail.del()
+    assert.deepEqual(reply, null)
   })
 })
