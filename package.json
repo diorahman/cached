@@ -1,0 +1,33 @@
+{
+  "name": "cached",
+  "version": "1.0.0",
+  "description": "A thin layer on top of promisified redis",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register"
+  },
+  "author": "Dhi Aurrahman <dio@hooq.tv>",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "redis": "^2.7.1"
+  },
+  "babel": {
+    "plugins": [
+      "transform-async-to-generator"
+    ]
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
+    "mocha": "^3.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diorahman/cached.git"
+  },
+  "bugs": {
+    "url": "https://github.com/diorahman/cached/issues"
+  },
+  "homepage": "https://github.com/diorahman/cached#readme"
+}
