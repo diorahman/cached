@@ -1,6 +1,6 @@
 {
   "name": "etherd",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A thin layer on top of promisified redis",
   "main": "index.js",
   "scripts": {
