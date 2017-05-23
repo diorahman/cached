@@ -30,7 +30,8 @@ describe('cache', () => {
     await cache.sadd('haha', {ok: 2})
 
     const objects = await cache.smembers('haha')
-    assert.deepEqual(objects, [{ok: 1}, {ok: 2}])
+    assert.ok(objects[0].ok === 1 || objects[0].ok === 2)
+    assert.ok(objects[1].ok === 1 || objects[1].ok === 2)
 
     await cache.del('haha')
     await cache.sadd('haha', 'ok2')
