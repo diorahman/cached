@@ -1,4 +1,4 @@
-const EXPIRY = process.env.DEFAULT_CACHE_EXPIRY || 300
+const EXPIRY = Number(process.env.DEFAULT_CACHE_EXPIRY) || 300
 const CONFIG = {
   host: process.env.REDIS_HOST || 'localhost',
   port: process.env.REDIS_PORT || 6379,
@@ -12,6 +12,7 @@ module.exports = class Cache {
   constructor (namespace, config = CONFIG) {
     this.namespace = namespace || '' // the default namespace is ''
     this.storage = storage(config)
+    this.expiry = config.expiry || EXPIRY
   }
 
   prefixed (key) {
@@ -26,7 +27,7 @@ module.exports = class Cache {
     return typeof key === 'string'
   }
 
-  set (key, val, expiry = EXPIRY) {
+  set (key, val, expiry = this.expiry || EXPIRY) {
     if (!this.validKeyVal(key, val)) {
       return Promise.resolve(null)
     }
@@ -124,5 +125,14 @@ module.exports = class Cache {
     return this.storage.existsAsync(this.prefixed(key))
       .then((result) => result > 0)
       .catch(() => false)
+  }
+
+  ttl (key) {
+    if (!this.validKey(key)) {
+      return Promise.resolve(null)
+    }
+
+    return this.storage.ttlAsync(this.prefixed(key))
+      .catch(() => null)
   }
 }

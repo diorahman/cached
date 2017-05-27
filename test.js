@@ -94,6 +94,7 @@ describe('cache', () => {
 
   it('should exists', async () => {
     await cache.set('1', '2')
+    assert.deepEqual(await cache.ttl('1'), 300)
     assert.ok(await cache.exists('1'))
   })
 
@@ -115,5 +116,16 @@ describe('cache', () => {
     await cache.lrem('list1', '2')
     const range4 = await cache.lrange('list1')
     assert.deepEqual(range4, ['3', '1'])
+  })
+
+  it('set default expiry', async () => {
+    const config = {
+      host: 'localhost',
+      port: 6379,
+      expiry: 1111
+    }
+    const unique = new Cache('ok3', config)
+    await unique.set('1', '1')
+    assert.deepEqual(await unique.ttl('1'), config.expiry)
   })
 })
