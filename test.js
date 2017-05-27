@@ -20,6 +20,7 @@ describe('cache', () => {
     assert.deepEqual(await cache.lrem(), null)
     assert.deepEqual(await cache.lrange(), [])
     assert.deepEqual(await cache.exists(), false)
+    assert.deepEqual(await cache.ttl(), null)
   })
 
   it('should set and get a value', async () => {
