@@ -10,7 +10,7 @@ const storage = require('./storage')
 
 module.exports = class Cache {
   constructor (namespace, config = CONFIG) {
-    this.namespace = namespace || '->:cache'
+    this.namespace = namespace || '' // the default namespace is ''
     this.storage = storage(config)
   }
 
@@ -54,6 +54,7 @@ module.exports = class Cache {
       .catch(() => null)
   }
 
+  // set
   sadd (key, member) {
     if (!this.validKeyVal(key, member)) {
       return Promise.resolve(null)
@@ -82,5 +83,46 @@ module.exports = class Cache {
         return parseMember ? members.map(member => typeof member === 'string' ? JSON.parse(member) : member) : members
       })
       .catch(() => null)
+  }
+
+  // list
+  lpush (key, item) {
+    if (!this.validKey(key, item)) {
+      return Promise.resolve(null)
+    }
+
+    return this.storage.lpushAsync(this.prefixed(key), typeof item === 'string' ? item : JSON.stringify(item))
+      .catch(() => null)
+  }
+
+  lrem (key, item, count = 0) {
+    // NOTE: remove all items equal to item
+    if (!this.validKeyVal(key, item)) {
+      return Promise.resolve(null)
+    }
+
+    return this.storage.lremAsync(this.prefixed(key), count, item)
+      .catch(() => null)
+  }
+
+  lrange (key, start = 0, end = -1) {
+    if (!this.validKey(key)) {
+      return Promise.resolve([])
+    }
+
+    return this.storage.lrangeAsync(this.prefixed(key), start, end)
+      // FIXME: do we need this to return an array when failed or null?
+      .then((result) => result || [])
+      .catch(() => [])
+  }
+
+  exists (key) {
+    if (!this.validKey(key)) {
+      return Promise.resolve(false)
+    }
+
+    return this.storage.existsAsync(this.prefixed(key))
+      .then((result) => result > 0)
+      .catch(() => false)
   }
 }

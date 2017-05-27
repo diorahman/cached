@@ -16,12 +16,16 @@ describe('cache', () => {
     assert.deepEqual(await cache.sadd('haha'), null)
     assert.deepEqual(await cache.smembers(), null)
     assert.deepEqual(await cache.srem(), null)
+    assert.deepEqual(await cache.lpush(), null)
+    assert.deepEqual(await cache.lrem(), null)
+    assert.deepEqual(await cache.lrange(), [])
+    assert.deepEqual(await cache.exists(), false)
   })
 
   it('should set and get a value', async () => {
-    await cache.del('hihi')
-    await cache.set('hihi', {ok: 1})
-    const saved = await cache.get('hihi')
+    await cache.del('huhu')
+    await cache.set('huhu', {ok: 1})
+    const saved = await cache.get('huhu')
     assert.deepEqual(saved, {ok: 1})
   })
 
@@ -86,5 +90,30 @@ describe('cache', () => {
     const fail = new Cache('ok2', config)
     const reply = await fail.del()
     assert.deepEqual(reply, null)
+  })
+
+  it('should exists', async () => {
+    await cache.set('1', '2')
+    assert.ok(await cache.exists('1'))
+  })
+
+  it('should push, range and remove items from a list', async () => {
+    await cache.del('list1')
+    await cache.lpush('list1', '1')
+    await cache.lpush('list1', '2')
+    await cache.lpush('list1', '3')
+
+    const range1 = await cache.lrange('list1')
+    assert.deepEqual(range1, ['3', '2', '1'])
+
+    const range2 = await cache.lrange('list1', 1)
+    assert.deepEqual(range2, ['2', '1'])
+
+    const range3 = await cache.lrange('list1', 1, 1)
+    assert.deepEqual(range3, ['2'])
+
+    await cache.lrem('list1', '2')
+    const range4 = await cache.lrange('list1')
+    assert.deepEqual(range4, ['3', '1'])
   })
 })
