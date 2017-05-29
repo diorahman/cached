@@ -20,11 +20,11 @@ module.exports = class Cache {
   }
 
   validKeyVal (key, val) {
-    return typeof key === 'string' && (typeof val === 'string' || typeof val === 'object')
+    return typeof key === 'string' && key.length > 0 && (typeof val === 'string' || typeof val === 'object')
   }
 
   validKey (key) {
-    return typeof key === 'string'
+    return typeof key === 'string' && key.length > 0
   }
 
   set (key, val, expiry = this.expiry || EXPIRY) {
@@ -134,5 +134,19 @@ module.exports = class Cache {
 
     return this.storage.ttlAsync(this.prefixed(key))
       .catch(() => null)
+  }
+
+  batchGet (keys, parseResult = true) {
+    const k = keys.filter((key) => this.validKey(key))
+    if (!Array.isArray(keys) || k.length === 0) {
+      return Promise.resolve([])
+    }
+    const batch = this.storage.batch()
+    k.forEach((key) => batch.get(this.prefixed(key)))
+    return batch.execAsync()
+      .then((results) => {
+        return results.map((val) => parseResult && typeof val === 'string' ? JSON.parse(val) : val)
+      })
+      .catch(() => [])
   }
 }

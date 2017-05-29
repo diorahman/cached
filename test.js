@@ -143,4 +143,22 @@ describe('cache', () => {
 
     assert.deepEqual(results, ['ok', 'ok'])
   })
+
+  it('should use batchGet to execute in batch', async () => {
+    await cache.del('batch1')
+    await cache.del('batch2')
+    await cache.set('batch1', 'ok')
+    await cache.set('batch2', 'ok')
+
+    const result1 = await cache.batchGet(['batch1', 'batch2'], false)
+    assert.deepEqual(result1, ['ok', 'ok'])
+
+    await cache.del('batch1')
+    await cache.del('batch2')
+    await cache.set('batch1', {ok: 1})
+    await cache.set('batch2', {ok: 1})
+
+    const result2 = await cache.batchGet(['batch1', 'batch2'])
+    assert.deepEqual(result2, [{ok: 1}, {ok: 1}])
+  })
 })
