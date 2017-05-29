@@ -119,7 +119,7 @@ describe('cache', () => {
     assert.deepEqual(range4, ['3', '1'])
   })
 
-  it('set default expiry', async () => {
+  it('should set default expiry', async () => {
     const config = {
       host: 'localhost',
       port: 6379,
@@ -128,5 +128,19 @@ describe('cache', () => {
     const unique = new Cache('ok3', config)
     await unique.set('1', '1')
     assert.deepEqual(await unique.ttl('1'), config.expiry)
+  })
+
+  it('should execute in batch', async () => {
+    await cache.del('batch1')
+    await cache.del('batch2')
+    await cache.set('batch1', 'ok')
+    await cache.set('batch2', 'ok')
+
+    const results = await cache.storage.batch()
+      .get(cache.prefixed('batch1'))
+      .get(cache.prefixed('batch2'))
+      .execAsync()
+
+    assert.deepEqual(results, ['ok', 'ok'])
   })
 })
