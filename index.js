@@ -137,8 +137,8 @@ module.exports = class Cache {
   }
 
   batchGet (keys, parseResult = true) {
-    const k = keys.filter((key) => this.validKey(key))
-    if (!Array.isArray(keys) || k.length === 0) {
+    let k
+    if (!Array.isArray(keys) || (k = keys.filter((key) => this.validKey(key))).length === 0) {
       return Promise.resolve([])
     }
     const batch = this.storage.batch()
